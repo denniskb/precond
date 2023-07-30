@@ -106,7 +106,7 @@ Given `pre::cond<...> mycond{...};`:
 ```c++
 void finite_differences(
   pre::same_size<
-    pre::monotonic<span<float>>,      // x, must be strictly increasing
-    span<float>                       // f(x), must have same size as x
+    pre::monotonic<span<float>>,        // x, must be strictly increasing
+    span<float>                         // f(x), must have same size as x
   > x_fx, span<float> out_derivatives);
 ```
