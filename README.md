@@ -1,4 +1,4 @@
-# pre::cond Explicit <span style="color:maroon;">Pre</span><span style="color:navy;">cond</span>itions for Function Arguments.
+# pre::cond Explicit <span style="color:maroon;">Pre</span><span style="color:navy;">cond</span>itions for Function Arguments
 Instead of relying on comments, make your preconditions an explicit part of your function signatures (and check them at the same time):
 
 ```c++
