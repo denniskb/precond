@@ -7,7 +7,7 @@ int safe_divide(int x, pre::not_zero<int> y) {
 }
 
 float safe_mean(pre::not_empy<const std::vector<float>&> v) {
-  return std::reduce(v->begin(), v->end()) / v.size();
+  return std::reduce(v->begin(), v->end()) / v->size();
 }
 
 void plot(pre::same_size<std::span<const int>, std::span<const float>> xy) {
