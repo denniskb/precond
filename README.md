@@ -20,42 +20,43 @@ void plot(pre::same_size<std::span<const int>, std::span<const float>> xy) {
 - C++20 compiler
 
 ## Setup
-1. Copy `pre.h` into your project.
-2. `pre::cond` does not come with any pre-defined conditions<sup>1</sup>. You must define your own. It's quick & easy! Example:
+**1.** Copy `pre.h` into your project.
 
-    ```c++
-    #include "pre.h"
+**2.** `pre::cond` does not come with any pre-defined conditions<sup>1</sup>. You must define your own. It's quick & easy! Example:
 
-    #include <cassert>
+```c++
+#include "pre.h"
 
-    template <class T>
-    using positive = pre::cond<[](auto x) { assert(x > 0); }, T>;
+#include <cassert>
 
-    template <class T>
-    using not_zero = pre::cond<[](auto x) { assert(x != 0); }, T>;
+template <class T>
+using positive = pre::cond<[](auto x) { assert(x > 0); }, T>;
 
-    template <class T>
-    using not_null = pre::cond<[](auto* p) { assert(p); }, T>;
+template <class T>
+using not_zero = pre::cond<[](auto x) { assert(x != 0); }, T>;
 
-    template <class T>
-    using not_empty = pre::cond<[](auto&& cont) { assert(!cont.empty()); }, T>;
+template <class T>
+using not_null = pre::cond<[](auto* p) { assert(p); }, T>;
 
-    template <class... Ts>
-    using same_size = pre::cond<[](auto&&... conts) { assert(conts.size() == ...); }, Ts...>;
+template <class T>
+using not_empty = pre::cond<[](auto&& cont) { assert(!cont.empty()); }, T>;
+
+template <class... Ts>
+using same_size = pre::cond<[](auto&&... conts) { assert(conts.size() == ...); }, Ts...>;
 ```
 
-    <sup>1</sup>This was a conscious decision. There are too many preferences as to how to handle violated preconditions (assert/throw/log error/print stacktrace/terminate, debug/release, ...).
+<sup>1</sup>This was a conscious decision. There are too many preferences as to how to handle violated preconditions (assert/throw/log error/print stacktrace/terminate, debug/release, ...).
 
-3. `pre::cond` itself **should always be accepted by non-const value**. Instead, use the template arguments to qualify your parameters. You should use the exact same qualifiers as you would if you were accepting your parameters directly:
+**3.** `pre::cond` itself **should always be accepted by non-const value**. Instead, use the template arguments to qualify your parameters. You should use the exact same qualifiers as you would if you were accepting your parameters directly:
 
-   ```c++
-   void func(const std::vector<object>& v)
+```c++
+void func(const std::vector<object>& v)
                         |
                         v
-   void func(mycond<const std::vector<object>& v)
-   ```
+void func(mycond<const std::vector<object>& v)
+```
 
-4. `pre::cond` has the same lifetime and value/reference semantics as a naked parameter with the same qualifiers would. Its interface is almost the same:
+**4.** `pre::cond` has the same lifetime and value/reference semantics as a naked parameter with the same qualifiers would. Its interface is almost the same:
 
 ```c++
 float safe_sqrt(pre::positive<float> x) {
