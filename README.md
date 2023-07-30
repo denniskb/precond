@@ -53,7 +53,7 @@ using same_size = pre::cond<[](auto&&... conts) { assert(conts.size() == ...); }
 void func(const std::vector<object>& v)
                         |
                         v
-void func(mycond<const std::vector<object>& v)
+void func(mycond<const std::vector<object>&> v)
 ```
 
 **4.** `pre::cond` has the same lifetime and value/reference semantics as a naked parameter with the same qualifiers would. Its interface is almost the same:
