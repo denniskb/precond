@@ -17,7 +17,7 @@ float safe_modf(float num, pre::not_null<float*> iptr) {...}
 - C++20 compiler
 
 ## Setup
-Copy `pre.h` into your project.
+1. Copy `pre.h` into your project.
 
 ## Usage
 `pre::cond` comes with the following default preconditions:
