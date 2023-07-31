@@ -321,6 +321,22 @@ int main() {
     a();
     assert(x == 6);
   }
+  {
+    auto pfunc = [] {};
+    pre::assert_on_fail::not_null<void (*)()>{pfunc}();
+  }
+  {
+    int x = 5;
+    any<int*> a{&x};
+    *a = 10;
+    assert(x == 10);
+  }
+  {
+    int x = 5;
+    auto fun = [&](int newval) { x = newval; };
+    any<decltype(fun)>{fun}(10);
+    assert(x == 10);
+  }
 
   return 0;
 }

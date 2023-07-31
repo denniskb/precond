@@ -76,15 +76,16 @@ struct cond {
   }
 
   constexpr auto& operator[](std::size_t i)
-    requires(requires { value[0]; })
+    requires(requires { value[std::size_t(0u)]; })
   {
     return value[i];
   }
 
-  constexpr decltype(auto) operator()()
-    requires(requires { value(); })
+  template <class... Args>
+  constexpr decltype(auto) operator()(Args&&... args)
+    requires(requires { value(std::forward<Args>(args)...); })
   {
-    return value();
+    return value(std::forward<Args>(args)...);
   }
 };
 
