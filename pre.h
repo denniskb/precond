@@ -21,52 +21,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
-#include <tuple>
 #include <type_traits>
 #include <utility>
 
 namespace pre {
-namespace detail {
-// If T is a reference type, do nothing, otherwise add an lvalue reference.
-template <class T>
-using add_reference_t = std::conditional_t<std::is_reference_v<T>, T, T&>;
-}  // namespace detail
 
-template <auto Check, class... Ts>
+template <auto Check, class T>
 struct cond {
-  std::tuple<Ts...> params;
+  T value;
 
-  // Construct precondition from one or more params, implicitly so in the case
-  // of one input.
-  // Call Check with all params.
-  constexpr cond(Ts... params_) : params{std::forward<Ts>(params_)...} {
-    std::apply(Check, params);
-  }
+  constexpr cond(T value_) : value{std::forward<T>(value_)} { Check(value); }
 
-  // Helpers
-  template <int I>
-  using ith_t = std::tuple_element_t<I, decltype(params)>;
-  template <int I>
-  using ith_return_t = detail::add_reference_t<ith_t<I>>;
+  using return_t = std::conditional_t<std::is_reference_v<T>, T, T&>;
+  constexpr operator return_t() { return value; }
 
-  // Return the i-th input
-  template <int I>
-  constexpr ith_return_t<I> get() {
-    return std::forward<ith_return_t<I>>(std::get<I>(params));
-  }
-  // Implicitly convert to the first input (requires sizeof...(Ts)==0)
-  constexpr operator ith_return_t<0>()
-    requires(sizeof...(Ts) == 1)
-  {
-    return get<0>();
-  }
-  // Member access operator for the first input (requires sizeof...(Ts)==0)
-  constexpr auto* operator->()
-    requires(sizeof...(Ts) == 1)
-  {
-    return &get<0>();
-  }
-  // Return the underlying tuple
-  constexpr auto& operator*() { return params; }
+  constexpr auto* operator->() { return &value; }
 };
 }  // namespace pre
