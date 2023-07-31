@@ -17,9 +17,10 @@ float safe_modf(float num, pre::not_null<float*> iptr) {...}
 - C++20 compiler
 
 ## Setup
-**1.** Copy `pre.h` into your project.
+Copy `pre.h` into your project.
 
-**2.** `pre::cond` comes with the following default preconditions:
+## Usage
+`pre::cond` comes with the following default preconditions:
 
 - `not_zero`
 - `positive`
@@ -66,7 +67,7 @@ template <class T>
 using not_empty = pre::cond<T, [](auto&& cont) { assert(!cont.empty()); }>;
 ```
 
-**3.** `pre::cond` itself **should always be accepted by non-const value**. Instead, use the template arguments to qualify your parameters. You should use the exact same qualifiers as you would if you were accepting your parameters directly:
+`pre::cond` itself **should always be accepted by non-const value**. Instead, use the template arguments to qualify your parameters. You should use the exact same qualifiers as you would if you were accepting your parameters directly:
 
 ```c++
 void func(const std::vector<object>& v)
@@ -75,7 +76,7 @@ void func(const std::vector<object>& v)
 void func(mycond<const std::vector<object>&> v)
 ```
 
-**4.** `pre::cond` has the same lifetime and value/reference semantics and the same interface as a naked parameter would:
+`pre::cond` has the same lifetime and value/reference semantics and the same interface as a naked parameter would:
 
 ```c++
 float safe_sqrt(pre::positive<float> x) {
