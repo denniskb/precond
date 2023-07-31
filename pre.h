@@ -30,11 +30,15 @@ template <class T, auto Check>
 struct cond {
   T value;
 
-  constexpr cond(T value_) : value{std::forward<T>(value_)} { Check(value); }
+  constexpr cond(T value_) noexcept(
+      std::is_nothrow_constructible_v<T, T>&& noexcept(Check(value_)))
+      : value{std::forward<T>(value_)} {
+    Check(value);
+  }
 
   using return_t = std::conditional_t<std::is_reference_v<T>, T, T&>;
-  constexpr operator return_t() { return value; }
+  constexpr operator return_t() noexcept { return value; }
 
-  constexpr auto* operator->() { return &value; }
+  constexpr auto* operator->() noexcept { return &value; }
 };
 }  // namespace pre
