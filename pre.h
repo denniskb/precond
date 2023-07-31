@@ -26,10 +26,29 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace pre {
 
+namespace detail {
+template <class T, class... Ts>
+struct first {
+  using type = T;
+};
+template <class... Ts>
+using first_t = typename first<Ts...>::type;
+}  // namespace detail
+
 template <class T, auto Check>
 struct cond {
   T value;
 
+  template <class... Args>
+  constexpr cond(Args&&... args) noexcept(
+      std::is_nothrow_constructible_v<T, Args...>&& noexcept(Check(value)))
+    requires((sizeof...(Args) > 1) ||
+             sizeof...(Args) == 1 &&
+                 !std::is_same_v<std::decay_t<T>,
+                                 std::decay_t<detail::first_t<Args...>>>)
+      : value(std::forward<Args>(args)...) {
+    Check(value);
+  }
   constexpr cond(T value_) noexcept(
       std::is_nothrow_constructible_v<T, T>&& noexcept(Check(value_)))
       : value{std::forward<T>(value_)} {

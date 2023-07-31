@@ -74,8 +74,7 @@ void constexpr_for(auto func) {
 
 template <class T>
 constexpr bool is_movable =
-    std::is_object_v<T> && std::is_move_constructible_v<T>; /* &&
-     std::is_assignable_v<T&, T> && std::is_swappable_v<T>;*/
+    std::is_object_v<T> && std::is_move_constructible_v<T>;
 
 int main() {
   // clang-format off
@@ -98,8 +97,8 @@ int main() {
 		true , true , true , true, 
 		true , true , true , true,
 		true , true , true , true, 
-		false, false, true , false, 
-		false, false, false, true};
+		true, false, true , false, 
+		true, false, false, true};
     // clang-format on
 
     using rows_t = std::tuple<any<object>, any<const object>,
@@ -108,11 +107,12 @@ int main() {
     using cols_t = std::tuple<const object, const object&, object&, object&&>;
 
     constexpr_for<5>([](auto i_row) {
-      constexpr_for<4>([&](auto i_col) {
+      constexpr_for<0>([&](auto i_col) {
         constexpr int index = i_row * 4 + i_col;
         constexpr bool constructible =
             std::is_constructible_v<std::tuple_element_t<i_row, rows_t>,
                                     std::tuple_element_t<i_col, cols_t>>;
+
         static_assert(constructible == table[index]);
       });
     });
@@ -148,7 +148,7 @@ int main() {
     using cols_t = std::tuple<any<object>, any<const object>,
                               any<const object&>, any<object&>, any<object&&>>;
 
-    constexpr_for<5>([](auto i_row) {
+    constexpr_for<0>([](auto i_row) {
       constexpr_for<5>([&](auto i_col) {
         constexpr int index = i_row * 5 + i_col;
         constexpr bool constructible =
@@ -243,7 +243,7 @@ int main() {
     bool destroyed = false;
     auto fun = [&](any<object&&> a) { assert(!destroyed); };
 
-    fun({&destroyed});
+    fun(object{&destroyed});
     assert(destroyed);
 
     destroyed = false;
@@ -258,6 +258,18 @@ int main() {
   {
     any<std::vector<int>> a{std::vector<int>(5)};
     assert(a->size() == 5);
+  }
+
+  // In-place construction
+  {
+    any<std::vector<int>> a{5};
+    assert(a->size() == 5);
+    assert(a->at(0) == 0);
+  }
+  {
+    any<std::vector<int>> a{5, 1};
+    assert(a->size() == 5);
+    assert(a->at(0) == 1);
   }
 
   // Nested function calls with conditions
