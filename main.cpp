@@ -209,6 +209,14 @@ int main() {
     assert(a == 6);
   }
 
+  {
+    int x = 5;
+    any<int*> a{&x};
+    int* y = a;
+    (*y)++;
+    assert(x == 6);
+  }
+
   // 0-copy
   {
     object o;
@@ -274,7 +282,24 @@ int main() {
 
   // Nested function calls with conditions
   {
-    // TODO
+    auto inner = [](any<object> a) {};
+    auto outer = [&](any<object> a) { inner(a); };
+    outer(object{});
+  }
+  {
+    auto inner = [](any<object&> a) {
+      assert(a.value.ncopies == 0);
+      a.value.ncopies = 5;
+    };
+    auto outer = [&](any<object&> a) { inner(a); };
+    object o;
+    outer(o);
+    assert(o.ncopies == 5);
+  }
+  {
+    auto inner = [](any<object&&> a) { assert(a.value.ncopies == 0); };
+    auto outer = [&](any<object> a) { inner(std::move(a)); };
+    outer(object{});
   }
 
   return 0;

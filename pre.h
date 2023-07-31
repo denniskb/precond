@@ -55,8 +55,8 @@ struct cond {
     Check(value);
   }
 
-  using return_t = std::conditional_t<std::is_reference_v<T>, T, T&>;
-  constexpr operator return_t() noexcept { return value; }
+  constexpr operator T&() & noexcept { return value; }
+  constexpr operator T&&() && noexcept { return std::move(value); }
 
   constexpr auto* operator->() noexcept { return &value; }
 };
