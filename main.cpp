@@ -29,18 +29,6 @@ void assert_nothrow(auto func) {
 template <class T>
 using any = pre::cond<T, [](auto&&) {}>;
 
-template <class T>
-using positive = pre::cond<T, [](auto x) { myassert(x > 0); }>;
-
-template <class T>
-using not_zero = pre::cond<T, [](auto x) { myassert(x != 0); }>;
-
-template <class T>
-using not_null = pre::cond<T, [](auto* p) { myassert(p); }>;
-
-template <class T>
-using not_empty = pre::cond<T, [](auto&& cont) { myassert(!cont.empty()); }>;
-
 struct object {
   int ncopies = 0;
   bool* destroyed = nullptr;
@@ -159,23 +147,23 @@ int main() {
     });
   }
 
-  {
-      // What wrapper types can be moved from?
-      // static_assert(is_movable<any<object>>);
-      // static_assert(is_movable<any<object&>>);
-      // static_assert(is_movable<any<object&&>>);
-  }
-
   // checking functionality
   {
+    using namespace pre::throw_on_fail;
     assert_nothrow([] { positive<int>{5}; });
     assert_throw([] { positive<int>{-5}; });
 
     assert_nothrow([] { not_zero<int>{5}; });
     assert_throw([] { not_zero<int>{0}; });
 
+    assert_throw([] { not_null<void*>{nullptr}; });
+    assert_nothrow([] { not_null<int*>{reinterpret_cast<int*>(1)}; });
+
     assert_nothrow([] { not_empty<std::vector<int>>{std::vector<int>(5)}; });
     assert_throw([] { not_empty<std::vector<int>>{std::vector<int>()}; });
+
+    assert_nothrow([] { sorted<std::vector<int>>{{1, 2}}; });
+    assert_throw([] { sorted<std::vector<int>>{{2, 1}}; });
   }
 
   // reference semantics

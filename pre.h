@@ -21,7 +21,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <cassert>
 #include <cstddef>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 
@@ -85,4 +87,52 @@ struct cond {
     return value();
   }
 };
+
+namespace assert_on_fail {
+template <class T>
+using not_zero = cond<T, [](auto i) { assert(i != T{0}); }>;
+
+template <class T>
+using positive = cond<T, [](auto i) { assert(i > T{0}); }>;
+
+template <class T>
+using not_null = cond<T, [](auto* p) { assert(p != nullptr); }>;
+
+template <class T>
+using not_empty = cond<T, [](auto&& cont) { assert(!cont.empty()); }>;
+
+template <class T>
+using sorted = cond<T, [](auto&& cont) {
+  assert(std::is_sorted(cont.begin(), cont.end()));
+}>;
+}  // namespace assert_on_fail
+
+namespace throw_on_fail {
+template <class T>
+using not_zero = cond<T, [](auto i) {
+  if (i == T{0}) throw std::logic_error("Precondition 'not_zero' failed");
+}>;
+
+template <class T>
+using positive = cond<T, [](auto i) {
+  if (!(i > T{0})) throw std::logic_error("Precondition 'positive' failed");
+}>;
+
+template <class T>
+using not_null = cond<T, [](auto* p) {
+  if (p == nullptr) throw std::logic_error("Precondition 'not_null' failed");
+}>;
+
+template <class T>
+using not_empty = cond<T, [](auto&& cont) {
+  if (cont.empty()) throw std::logic_error("Precondition 'not_empty' failed");
+}>;
+
+template <class T>
+using sorted = cond<T, [](auto&& cont) {
+  if (!std::is_sorted(cont.begin(), cont.end()))
+    throw std::logic_error("Precondition 'sorted' failed");
+}>;
+}  // namespace throw_on_fail
+
 }  // namespace pre
