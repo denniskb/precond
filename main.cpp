@@ -27,19 +27,19 @@ void assert_nothrow(auto func) {
 }
 
 template <class T>
-using any = pre::cond<[](auto&&) {}, T>;
+using any = pre::cond<T, [](auto&&) {}>;
 
 template <class T>
-using positive = pre::cond<[](auto x) { myassert(x > 0); }, T>;
+using positive = pre::cond<T, [](auto x) { myassert(x > 0); }>;
 
 template <class T>
-using not_zero = pre::cond<[](auto x) { myassert(x != 0); }, T>;
+using not_zero = pre::cond<T, [](auto x) { myassert(x != 0); }>;
 
 template <class T>
-using not_null = pre::cond<[](auto* p) { myassert(p); }, T>;
+using not_null = pre::cond<T, [](auto* p) { myassert(p); }>;
 
 template <class T>
-using not_empty = pre::cond<[](auto&& cont) { myassert(!cont.empty()); }, T>;
+using not_empty = pre::cond<T, [](auto&& cont) { myassert(!cont.empty()); }>;
 
 struct object {
   int ncopies = 0;
@@ -198,6 +198,13 @@ int main() {
   {
     int x = 5;
     any<const int&> a{x};
+    x++;
+    assert(a == 6);
+  }
+
+  {
+    any<int> a{5};
+    int& x = a;
     x++;
     assert(a == 6);
   }

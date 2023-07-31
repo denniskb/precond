@@ -26,7 +26,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 namespace pre {
 
-template <auto Check, class T>
+template <class T, auto Check>
 struct cond {
   T value;
 
