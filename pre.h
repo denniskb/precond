@@ -21,6 +21,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 
@@ -55,9 +56,33 @@ struct cond {
     Check(value);
   }
 
+  cond(const cond&) = delete;
+  cond(cond&&) = delete;
+  cond& operator=(const cond&) = delete;
+  cond& operator=(cond&&) = delete;
+
   constexpr operator T&() & noexcept { return value; }
   constexpr operator T&&() && noexcept { return std::move(value); }
-
   constexpr auto* operator->() noexcept { return &value; }
+
+  template <class U>
+  constexpr cond& operator=(U&& u)
+    requires(std::is_assignable_v<T, U>)
+  {
+    value = std::forward<U>(u);
+    return *this;
+  }
+
+  constexpr auto& operator[](std::size_t i)
+    requires(requires { value[0]; })
+  {
+    return value[i];
+  }
+
+  constexpr decltype(auto) operator()()
+    requires(requires { value(); })
+  {
+    return value();
+  }
 };
 }  // namespace pre
