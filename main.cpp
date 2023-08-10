@@ -1,4 +1,5 @@
 #include <cassert>
+#include <functional>
 #include <vector>
 
 #include "pre.h"
@@ -80,30 +81,28 @@ int main() {
   //
   // clang-format on
   {
-    // clang-format off
-    constexpr bool table[] = {
-		true , true , true , true, 
-		true , true , true , true,
-		true , true , true , true, 
-		true, false, true , false, 
-		true, false, false, true};
-    // clang-format on
+    object o{nullptr};
+    const object co{nullptr};
 
-    using rows_t = std::tuple<any<object>, any<const object>,
-                              any<const object&>, any<object&>, any<object&&>>;
+    any<object>{o};
+    any<object>{co};
+    any<object>{object(nullptr)};
 
-    using cols_t = std::tuple<const object, const object&, object&, object&&>;
+    any<const object>{co};
+    any<const object>{o};
+    any<const object>{object(nullptr)};
 
-    constexpr_for<5>([](auto i_row) {
-      constexpr_for<0>([&](auto i_col) {
-        constexpr int index = i_row * 4 + i_col;
-        constexpr bool constructible =
-            std::is_constructible_v<std::tuple_element_t<i_row, rows_t>,
-                                    std::tuple_element_t<i_col, cols_t>>;
+    any<const object&>{o};
+    any<const object&>{co};
+    any<const object&>{object(nullptr)};
 
-        static_assert(constructible == table[index]);
-      });
-    });
+    any<object&>{o};
+    // any<object&>{co};
+    // any<object&>{object(nullptr)};
+
+    any<object&&>{object(nullptr)};
+    // any<object&&>{o};
+    // any<object&&>{co};
   }
 
   // clang-format off
@@ -116,35 +115,49 @@ int main() {
   // object             |      ✓      |         ✓         |          ✓         |       ✓      |       ✓ 
   // const object       |      ✓      |         ✓         |          ✓         |       ✓      |       ✓ 
   // const object&      |      ✓      |         ✓         |          ✓         |       ✓      |       ✓
-  // object&            |      ✓      |         ✗         |          ✗         |       ✓      |       ✗
-  // object&&           |      ✗      |         ✗         |          ✗         |       ✗      |       ✓
+  // object&            |      ✓      |         ✗         |          ✗         |       ✓      |       ✓
+  // object&&           |      ✓      |         ✗         |          ✗         |       ✗      |       ✓
   //
   // clang-format on
   {
+    any<object> a{nullptr};
+    any<const object> ca{nullptr};
+    object o{nullptr};
+    any<const object&> car{o};
+    any<object&> ar{o};
+    any<object&&> arr{object{nullptr}};
+
     // clang-format off
-    constexpr bool table[] = {
-		true , true , true , true , true,
-		true , true , true , true , true,
-		true , true , true , true , true,
-		true , false, false, true , false, 
-		false, false, false, false, true};
+    { object o = a; }
+    { object o = ca; }
+    { object o = car; }
+    { object o = ar; }
+    { object o = arr; }
+
+	{ const object o = a; }
+    { const object o = ca; }
+    { const object o = car; }
+    { const object o = ar; }
+    { const object o = arr; }
+
+	{ const object& o = a; }
+    { const object& o = ca; }
+    { const object& o = car; }
+    { const object& o = ar; }
+    { const object& o = arr; }
+
+	{ object& o = a; }
+    //{ object& o = ca; }
+    //{ object& o = car; }
+    { object& o = ar; }
+    { object& o = arr; }
+
+	{ object&& o = std::move(a); }
+    //{ object&& o = std::move(ca); }
+    //{ object&& o = std::move(car); }
+    //{ object&& o = std::move(ar); }
+    { object&& o = std::move(arr); }
     // clang-format on
-
-    using rows_t =
-        std::tuple<object, const object, const object&, object&, object&&>;
-
-    using cols_t = std::tuple<any<object>, any<const object>,
-                              any<const object&>, any<object&>, any<object&&>>;
-
-    constexpr_for<0>([](auto i_row) {
-      constexpr_for<5>([&](auto i_col) {
-        constexpr int index = i_row * 5 + i_col;
-        constexpr bool constructible =
-            std::is_constructible_v<std::tuple_element_t<i_row, rows_t>,
-                                    std::tuple_element_t<i_col, cols_t>>;
-        static_assert(constructible == table[index]);
-      });
-    });
   }
 
   // checking functionality
